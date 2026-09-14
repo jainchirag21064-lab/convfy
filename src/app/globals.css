@@ -55,6 +55,7 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --color-whatsapp: #25d366;
 }
 
 /* ============================================================
@@ -234,6 +235,33 @@ html[data-theme="rose"] {
   --sidebar-primary: oklch(0.645 0.22 16);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-ring: oklch(0.645 0.22 16);
+}
+
+/* Typing indicator dots inside the CONVfy bubble mark — bounce like
+   WhatsApp's "…" while a message is being typed */
+@keyframes convfy-dot {
+  0%,
+  55%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.45;
+  }
+  30% {
+    transform: translateY(-2.6px);
+    opacity: 1;
+  }
+}
+.convfy-dot {
+  animation: convfy-dot 1.35s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .convfy-dot {
+    animation: none;
+    opacity: 1;
+  }
 }
 
 @layer base {

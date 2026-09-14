@@ -189,8 +189,9 @@ export function Sidebar({ open = false, onClose }: SidebarProps) {
         <div className="border-border flex h-14 shrink-0 items-center justify-between gap-2 border-b px-4">
           <Link href="/dashboard" className="flex items-center gap-2">
             <ConvfyMark className="h-7 w-7" />
-            <span className="text-foreground text-sm font-semibold">
-              {t('title')}
+            <span className="text-sm font-semibold">
+              <span className="text-foreground">CONV</span>
+              <span className="text-whatsapp">fy</span>
             </span>
           </Link>
           <button

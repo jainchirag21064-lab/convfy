@@ -15,7 +15,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MessageSquare, CheckCircle, UsersRound } from "lucide-react";
+import { CheckCircle, UsersRound } from "lucide-react";
+import { ConvfyMark } from "@/components/ui/convfy-mark";
 
 function signupErrorMessage(error: { message?: unknown }): string {
   const message = typeof error.message === "string" ? error.message.trim() : "";
@@ -194,7 +195,7 @@ function SignupPageInner() {
             ) : channel === "platform" ? (
               <CheckCircle className="h-6 w-6 text-primary" />
             ) : (
-              <MessageSquare className="h-6 w-6 text-primary" />
+              <ConvfyMark className="h-6 w-6" />
             )}
           </div>
           <CardTitle className="text-xl text-foreground">
