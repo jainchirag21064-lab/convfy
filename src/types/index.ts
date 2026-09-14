@@ -82,6 +82,9 @@ export interface PlatformAccountListItem {
    *  `null` means "use the platform default" (returned separately as
    *  `default_member_limit`). */
   member_limit: number | null;
+  /** Whether Flows import/export is enabled for this account
+   *  (accounts.flow_import_export_enabled, migration 048). */
+  flow_import_export_enabled: boolean;
   whatsapp_configured: boolean;
 }
 

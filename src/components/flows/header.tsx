@@ -45,14 +45,16 @@ import {
   useFlowEditor,
   type BuilderState,
 } from "./flow-editor-state";
+import { useFlowImportExportEnabled } from '@/hooks/use-flow-import-export';
 import {
   createFlowExportDocument,
   parseFlowExportDocument,
-} from "@/lib/flows/transfer";
+} from '@/lib/flows/transfer';
 
 export function EditorHeader() {
   const router = useRouter();
   const importInputRef = useRef<HTMLInputElement>(null);
+  const importExportEnabled = useFlowImportExportEnabled();
   const {
     flow,
     state,
@@ -156,29 +158,33 @@ export function EditorHeader() {
 
         {/* ---- right: runs · delete · activate · save ---- */}
         <div className="ml-auto flex flex-wrap items-center gap-1.5">
-          <input
-            ref={importInputRef}
-            type="file"
-            accept="application/json,.json"
-            className="hidden"
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (file) void importFlow(file);
-            }}
-          />
-          <Button variant="ghost" size="sm" onClick={exportFlow} title="Export flow JSON">
-            <Download className="h-3.5 w-3.5" />
-            Export
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => importInputRef.current?.click()}
-            title="Import flow JSON as a new draft"
-          >
-            <Upload className="h-3.5 w-3.5" />
-            Import
-          </Button>
+          {importExportEnabled && (
+            <>
+              <input
+                ref={importInputRef}
+                type="file"
+                accept="application/json,.json"
+                className="hidden"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  if (file) void importFlow(file);
+                }}
+              />
+              <Button variant="ghost" size="sm" onClick={exportFlow} title="Export flow JSON">
+                <Download className="h-3.5 w-3.5" />
+                Export
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => importInputRef.current?.click()}
+                title="Import flow JSON as a new draft"
+              >
+                <Upload className="h-3.5 w-3.5" />
+                Import
+              </Button>
+            </>
+          )}
           <Button
             variant="ghost"
             size="sm"

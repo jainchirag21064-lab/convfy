@@ -18,7 +18,6 @@ import {
   UserPlus,
   UsersRound,
   X,
-  Zap,
 } from 'lucide-react';
 import { ConvfyMark } from '@/components/ui/convfy-mark';
 import {
@@ -93,10 +92,9 @@ const navItems: NavItem[] = [
   { href: '/contacts', labelKey: 'contacts', icon: AddressBookIcon },
   { href: '/pipelines', labelKey: 'pipelines', icon: GitBranchIcon },
   { href: '/broadcasts', labelKey: 'broadcasts', icon: MegaphoneSimpleIcon },
-  { href: '/automations', labelKey: 'automations', icon: Zap },
-  { href: '/flows', labelKey: 'flows', icon: FlowArrowIcon, beta: true },
+  { href: '/flows', labelKey: 'flows', icon: FlowArrowIcon },
   { href: '/agents', labelKey: 'aiAgents', icon: RobotIcon },
-];;
+];
 
 const bottomNavItems = [
   { href: '/settings', labelKey: 'settings', icon: Settings },

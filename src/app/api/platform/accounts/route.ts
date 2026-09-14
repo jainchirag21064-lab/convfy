@@ -27,7 +27,9 @@ export async function GET() {
     // that lives on the profiles row) and member counts.
     const { data: accounts, error } = await supabase
       .from('accounts')
-      .select('id, name, status, created_at, owner_user_id, member_limit')
+      .select(
+        'id, name, status, created_at, owner_user_id, member_limit, flow_import_export_enabled'
+      )
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -138,6 +140,7 @@ export async function GET() {
         owner_email: owner?.email ?? '',
         member_count: memberCountByAccount.get(a.id) ?? 0,
         member_limit: a.member_limit ?? null,
+        flow_import_export_enabled: a.flow_import_export_enabled === true,
         whatsapp_configured: whatsappConfiguredByAccount.has(a.id),
       };
     });

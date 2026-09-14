@@ -100,6 +100,7 @@ describe('GET /api/platform/accounts', () => {
               created_at: '2025-01-01T00:00:00Z',
               owner_user_id: 'owner-1',
               member_limit: 10,
+              flow_import_export_enabled: true,
             },
             {
               id: 'acct-2',
@@ -107,6 +108,7 @@ describe('GET /api/platform/accounts', () => {
               status: 'suspended',
               created_at: '2025-02-01T00:00:00Z',
               owner_user_id: 'owner-2',
+              flow_import_export_enabled: false,
             },
           ],
           error: null,
@@ -150,6 +152,7 @@ describe('GET /api/platform/accounts', () => {
       owner_email: 'alice@acme.com',
       member_count: 2,
       member_limit: 10,
+      flow_import_export_enabled: true,
       whatsapp_configured: true,
     });
     expect(body.accounts[1]).toEqual({
@@ -161,6 +164,7 @@ describe('GET /api/platform/accounts', () => {
       owner_email: 'bob@beta.com',
       member_count: 1,
       member_limit: null,
+      flow_import_export_enabled: false,
       whatsapp_configured: false,
     });
     // The effective limit is fetched once for the UI's default display.

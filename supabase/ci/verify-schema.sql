@@ -221,6 +221,26 @@ BEGIN
   ) THEN
     RAISE EXCEPTION 'enforce_invite_seat_cap() is missing — migration 047 did not apply';
   END IF;
+  -- 048: per-account flow import/export feature flag
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'accounts'
+      AND column_name = 'flow_import_export_enabled'
+      AND data_type = 'boolean'
+      AND is_nullable = 'NO'
+  ) THEN
+    RAISE EXCEPTION 'accounts.flow_import_export_enabled NOT NULL is missing — migration 048 did not apply';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'accounts'
+      AND column_name = 'flow_import_export_enabled'
+      AND column_default IS NULL
+  ) THEN
+    RAISE EXCEPTION 'accounts.flow_import_export_enabled default false is missing — migration 048 did not apply';
+  END IF;
 
   RAISE NOTICE 'schema verification passed';
 END

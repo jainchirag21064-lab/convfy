@@ -30,6 +30,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { useAuth } from '@/hooks/use-auth';
 import type { PlatformAccountListItem } from '@/types';
 import {
@@ -214,6 +215,41 @@ export function PlatformAccountsClient() {
     }
   }, [editing, t, load]);
 
+  const toggleFlowImportExport = useCallback(
+    async (account: PlatformAccountListItem, next: boolean) => {
+      setBusyId(account.id);
+      try {
+        const res = await fetch(
+          `/api/platform/accounts/${account.id}/flows-import-export`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ enabled: next }),
+          }
+        );
+        if (res.status === 403) {
+          toast.error(t('toastForbidden'));
+          return;
+        }
+        if (res.status === 404) {
+          toast.error(t('toastFlowImportExportFailed'));
+          return;
+        }
+        if (!res.ok) {
+          toast.error(t('toastFlowImportExportFailed'));
+          return;
+        }
+        toast.success(t('toastFlowImportExportSaved'));
+        await load();
+      } catch {
+        toast.error(t('toastFlowImportExportFailed'));
+      } finally {
+        setBusyId(null);
+      }
+    },
+    [t, load]
+  );
+
   return (
     <div className="space-y-5">
       <div>
@@ -260,6 +296,7 @@ export function PlatformAccountsClient() {
                   <TableHead>{t('colOwner')}</TableHead>
                   <TableHead>{t('colMembers')}</TableHead>
                   <TableHead>{t('colLimit')}</TableHead>
+                  <TableHead>{t('colFlowImportExport')}</TableHead>
                   <TableHead>{t('colWhatsApp')}</TableHead>
                   <TableHead>{t('colStatus')}</TableHead>
                   <TableHead>{t('colCreated')}</TableHead>
@@ -317,6 +354,18 @@ export function PlatformAccountsClient() {
                             {t('overLimit')}
                           </span>
                         )}
+                      </TableCell>
+                      <TableCell>
+                        <Switch
+                          checked={a.flow_import_export_enabled}
+                          onCheckedChange={(next) =>
+                            void toggleFlowImportExport(a, next)
+                          }
+                          disabled={busyId !== null}
+                          aria-label={t('flowImportExportToggle', {
+                            name: a.name,
+                          })}
+                        />
                       </TableCell>
                       <TableCell>
                         {a.whatsapp_configured ? (
