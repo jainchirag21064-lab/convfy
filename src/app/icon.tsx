@@ -1,10 +1,10 @@
 import { ImageResponse } from "next/og";
 
-// Replaces the default Next.js favicon with the brand mark — WaPilot
-// brand green rounded square + white chat-square glyph — matching
-// the sidebar logo in `src/components/layout/sidebar.tsx`. Next.js
-// renders this at build time and auto-injects <link rel="icon"> into
-// <head>.
+// Replaces the default Next.js favicon with the CONVfy brand mark —
+// WhatsApp-green chat bubble with three typing dots — matching the
+// sidebar logo in `src/components/layout/sidebar.tsx` and the
+// marketing site. Next.js renders this at build time and auto-injects
+// <link rel="icon"> into <head>.
 //
 // This route takes precedence over src/app/favicon.ico, which is the
 // Next.js default and can stay on disk harmlessly (or be removed).
@@ -16,30 +16,21 @@ export const contentType = "image/png";
 export default function Icon() {
   return new ImageResponse(
     (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "#0f7a46", // WaPilot brand green
-          borderRadius: 6,
-        }}
+      <svg
+        width="32"
+        height="32"
+        viewBox="0 0 32 32"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
       >
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#ffffff"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-        </svg>
-      </div>
+        <path
+          d="M6 4.5A4.5 4.5 0 0 0 1.5 9v10a4.5 4.5 0 0 0 4.5 4.5H8v5.5l5.1-5.5H26a4.5 4.5 0 0 0 4.5-4.5V9A4.5 4.5 0 0 0 26 4.5H6Z"
+          fill="#25D366"
+        />
+        <circle cx="10.8" cy="14.4" r="2.7" fill="#ffffff" />
+        <circle cx="16" cy="14.4" r="2.7" fill="#ffffff" />
+        <circle cx="21.2" cy="14.4" r="2.7" fill="#ffffff" />
+      </svg>
     ),
     { ...size },
   );

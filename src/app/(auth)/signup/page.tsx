@@ -207,7 +207,7 @@ function SignupPageInner() {
               ? "Verify your email, then accept the invitation to join your team."
               : channel === "platform"
                 ? "You've been approved to sign up. Use the invited email to create your account."
-                : "Get started with WaPilot"}
+                : "Get started with CONVfy"}
           </CardDescription>
         </CardHeader>
         <CardContent>

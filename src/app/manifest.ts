@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "WaPilot",
-    short_name: "WaPilot",
+    name: "CONVfy",
+    short_name: "CONVfy",
     description:
       "Self-hostable CRM for WhatsApp — shared inbox, contacts, pipelines, broadcasts, and automations.",
     start_url: "/",

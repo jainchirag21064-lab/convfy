@@ -2,7 +2,7 @@
 
 // Brand/navigation icon set for wacrm.
 //
-// These are the exact Phosphor glyphs the wapilot-website marketing mockup
+// These are the exact Phosphor glyphs the CONVfy marketing site uses
 // uses in its product window sidebar (Inbox, Contacts, Pipelines, Broadcasts,
 // Flows, etc.). Keeping the same outlines here is what makes the real app
 // read as the product the site sells. Path data is copied from

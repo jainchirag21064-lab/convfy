@@ -71,8 +71,8 @@ export const THEMES: ReadonlyArray<ThemeMeta> = [
   {
     id: "brand",
     name: "Brand",
-    tagline: "The default — WhatsApp-style green, matches the WaPilot look.",
-    swatch: "oklch(0.277 0.037 129.9)",
+    tagline: "The default — WhatsApp-style green, matches the CONVfy look.",
+    swatch: "oklch(0.761 0.201 149.7)",
   },
   {
     id: "violet",

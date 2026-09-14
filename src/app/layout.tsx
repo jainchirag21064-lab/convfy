@@ -30,8 +30,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "WaPilot",
-    template: "%s — WaPilot",
+    default: "CONVfy",
+    template: "%s — CONVfy",
   },
   description: "Self-hostable CRM for WhatsApp.",
   robots: {
@@ -54,7 +54,7 @@ export const metadata: Metadata = {
   other: {
     "apple-mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "black-translucent",
-    "apple-mobile-web-app-title": "WaPilot",
+    "apple-mobile-web-app-title": "CONVfy",
     "mobile-web-app-capable": "yes",
   },
 };

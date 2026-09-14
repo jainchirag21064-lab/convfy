@@ -162,20 +162,22 @@ html[data-theme="violet"] {
 }
 
 html[data-theme="brand"] {
-  /* WaPilot brand green (#0f7a46) — the accent the marketing site uses.
-   * Slightly brighter cousins are reserved for data-viz legs (--chart-*)
-   * so charts stay legible on dark zinc surfaces. */
-  --primary: oklch(0.277 0.037 129.9);
-  --primary-foreground: oklch(0.985 0 0);
-  --primary-hover: oklch(0.235 0.034 131);
-  --primary-soft: oklch(0.277 0.037 129.9 / 0.12);
-  --primary-soft-2: oklch(0.277 0.037 129.9 / 0.2);
-  --ring: oklch(0.277 0.037 129.9);
-  --chart-1: oklch(0.45 0.06 150);
-  --chart-2: oklch(0.7 0.1 190);
-  --sidebar-primary: oklch(0.277 0.037 129.9);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-ring: oklch(0.277 0.037 129.9);
+  /* CONVfy brand green — the exact WhatsApp green (#25D366) the
+   * marketing site uses. Bright enough to need dark (not white)
+   * foreground text for contrast; slightly brighter cousins are
+   * reserved for data-viz legs (--chart-*) so charts stay legible
+   * on dark zinc surfaces. */
+  --primary: oklch(0.761 0.201 149.7);
+  --primary-foreground: oklch(0.18 0.04 152);
+  --primary-hover: oklch(0.8 0.19 149);
+  --primary-soft: oklch(0.761 0.201 149.7 / 0.12);
+  --primary-soft-2: oklch(0.761 0.201 149.7 / 0.22);
+  --ring: oklch(0.761 0.201 149.7);
+  --chart-1: oklch(0.761 0.201 149.7);
+  --chart-2: oklch(0.78 0.15 170);
+  --sidebar-primary: oklch(0.761 0.201 149.7);
+  --sidebar-primary-foreground: oklch(0.18 0.04 152);
+  --sidebar-ring: oklch(0.761 0.201 149.7);
 }
 
 html[data-theme="emerald"] {
