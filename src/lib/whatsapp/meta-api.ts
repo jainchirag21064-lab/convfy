@@ -1055,3 +1055,147 @@ export async function downloadMedia(
   const buffer = Buffer.from(await response.arrayBuffer())
   return { buffer, contentType }
 }
+
+// ============================================================
+// Embedded Signup v4 — BISU token exchange + debug
+// ============================================================
+
+export interface ExchangeBusinessTokenCodeArgs {
+  appId: string
+  appSecret: string
+  /**
+   * The single-use code returned by FB.login(...) after the customer
+   * completes Meta Embedded Signup. Valid for ~30 seconds and
+   * consumable exactly once — a second attempt is a fresh popup.
+   */
+  code: string
+}
+
+export interface ExchangeBusinessTokenCodeResult {
+  accessToken: string
+  tokenType: string
+  /**
+   * Seconds until expiry, or null when Meta didn't return one. The
+   * "60 Expiration Token" configuration template issues BISU tokens
+   * that are effectively permanent, so callers persist this to
+   * `token_expires_at` but should treat `null` as "long-lived".
+   */
+  expiresIn: number | null
+}
+
+/**
+ * Server-side exchange of the Embedded Signup code for a Business
+ * Integration System User (BISU) token.
+ *
+ *   GET /oauth/access_token?client_id&client_secret&code
+ *
+ * This MUST only ever run on the server — `client_secret` is the same
+ * secret that signs webhook payloads (META_APP_SECRET) and must never
+ * reach the browser. The returned BISU token is scoped to the business
+ * the end customer granted access to during the popup.
+ */
+export async function exchangeBusinessTokenCode(
+  args: ExchangeBusinessTokenCodeArgs
+): Promise<ExchangeBusinessTokenCodeResult> {
+  const { appId, appSecret, code } = args
+  const params = new URLSearchParams({
+    client_id: appId,
+    client_secret: appSecret,
+    code,
+  })
+  const response = await fetch(`${META_API_BASE}/oauth/access_token?${params}`, {
+    method: 'GET',
+  })
+  if (!response.ok) {
+    await throwMetaError(response, `Code exchange failed: ${response.status}`)
+  }
+  const data = await response.json()
+  if (!data.access_token) {
+    throw new Error('Meta code exchange returned no access_token')
+  }
+  const expiresIn = Number(data.expires_in)
+  return {
+    accessToken: data.access_token,
+    tokenType: data.token_type ?? 'bearer',
+    expiresIn: Number.isFinite(expiresIn) && expiresIn > 0 ? expiresIn : null,
+  }
+}
+
+export interface DebugBusinessTokenArgs {
+  /** The token whose validity we're probing (e.g. a stored BISU token). */
+  inputToken: string
+  /** An app-scoped token capable of calling /debug_token — `{appId}|{appSecret}`. */
+  appAccessToken: string
+}
+
+export interface DebugBusinessTokenResult {
+  appId: string
+  type: string
+  isValid: boolean
+  /**
+   * Expiry as Unix ms, or null when Meta reports none (BISU tokens
+   * from the "60 Expiration Token" configuration template return
+   * expires_at 0 / unset → effectively permanent).
+   */
+  expiresAtMs: number | null
+  /** Unix ms when data-access permissions expire (rarely set for BISU). */
+  dataAccessExpiresAtMs: number | null
+  scopes: string[]
+  granularScopes: { target: string; scope: string }[]
+  /** Present when the API itself reported whatever-it-debugged as errored. */
+  error?: { message: string; code: number }
+}
+
+/**
+ * Diagnostic — ask Meta whether a token is still valid and what it can
+ * do. The exchange route calls this right after a fresh BISU token is
+ * issued to sanity-check it; the diagnostic endpoint can call it later
+ * to warn when Meta reports the stored token is near or past expiry.
+ */
+export async function debugBusinessToken(
+  args: DebugBusinessTokenArgs
+): Promise<DebugBusinessTokenResult> {
+  const { inputToken, appAccessToken } = args
+  const params = new URLSearchParams({
+    input_token: inputToken,
+    access_token: appAccessToken,
+  })
+  const response = await fetch(`${META_API_BASE}/debug_token?${params}`, {
+    method: 'GET',
+  })
+  if (!response.ok) {
+    await throwMetaError(response, `Token debug failed: ${response.status}`)
+  }
+  const data = (await response.json()) as {
+    data?: {
+      app_id?: string
+      type?: string
+      is_valid?: boolean
+      expires_at?: number
+      data_access_expires_at?: number
+      scopes?: string[]
+      granular_scopes?: { target?: string; scope?: string }[]
+      error?: { message?: string; code?: number }
+    }
+  }
+  const d = data.data ?? {}
+  const toMs = (seconds: number | undefined): number | null => {
+    // Meta returns `expires_at: 0` for tokens that never expire.
+    const s = Number(seconds)
+    return Number.isFinite(s) && s > 0 ? s * 1000 : null
+  }
+  return {
+    appId: d.app_id ?? '',
+    type: d.type ?? '',
+    isValid: d.is_valid === true,
+    expiresAtMs: toMs(d.expires_at),
+    dataAccessExpiresAtMs: toMs(d.data_access_expires_at),
+    scopes: Array.isArray(d.scopes) ? d.scopes : [],
+    granularScopes: Array.isArray(d.granular_scopes)
+      ? d.granular_scopes.map((g) => ({ target: g.target ?? '', scope: g.scope ?? '' }))
+      : [],
+    error: d.error && d.error.message
+      ? { message: d.error.message, code: d.error.code ?? 0 }
+      : undefined,
+  }
+}

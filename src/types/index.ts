@@ -384,6 +384,24 @@ export interface WhatsAppConfig {
    * inbound attachments expire. Migration 039.
    */
   mirror_inbound_media?: boolean;
+  /**
+   * Meta Business / portfolio id granted during Embedded Signup
+   * (postMessage `business_id`). NULL for manually-entered setups.
+   * Migration 050.
+   */
+  business_portfolio_id?: string | null;
+  /**
+   * How the config was connected: `manual` (hand-entered credentials
+   * via POST /api/whatsapp/config) or `embedded_signup` (Meta
+   * Embedded Signup v4). Default `manual`. Migration 050.
+   */
+  onboarded_via?: 'manual' | 'embedded_signup';
+  /**
+   * Issued expiry of the stored access token. BISU tokens are
+   * effectively permanent unless Meta rotates them; diagnostics
+   * compare against `debug_token.data_expires_at`. Migration 050.
+   */
+  token_expires_at?: string | null;
 }
 
 // Raw Meta status enum. We persist this verbatim from Meta (sync + webhook)
@@ -747,6 +765,36 @@ export interface AutomationLog {
 // ============================================================
 // Quick replies — reusable snippets (migration 035)
 // ============================================================
+
+export interface Catalog {
+  id: string;
+  account_id: string;
+  meta_catalog_id: string;
+  name: string | null;
+  last_synced_at: string | null;
+  synced_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CatalogItem {
+  id: string;
+  account_id: string;
+  catalog_id: string;
+  meta_product_id: string;
+  retailer_id: string | null;
+  name: string;
+  description: string | null;
+  price: string | null;
+  currency: string | null;
+  url: string | null;
+  availability: string | null;
+  status: string | null;
+  image_url: string | null;
+  images: unknown[] | null;
+  created_at: string;
+  updated_at: string;
+}
 
 export type QuickReplyKind = 'text' | 'interactive';
 

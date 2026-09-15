@@ -24,6 +24,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Switch } from '@/components/ui/switch';
 import { SettingsPanelHead } from './settings-panel-head';
+import { EmbeddedSignupCard } from './embedded-signup-card';
 import {
   Accordion,
   AccordionItem,
@@ -95,6 +96,11 @@ export function WhatsAppConfig() {
   const lastRegistrationError = config?.last_registration_error ?? null;
 
   const [verifyingRegistration, setVerifyingRegistration] = useState(false);
+  // Feature flag for the "Connect with Meta" card — true only when the
+  // operator wired up the Embedded Signup env vars (the server-side
+  // /config route is the source of truth, since it can also see
+  // META_APP_ID + META_APP_SECRET which the browser cannot).
+  const [embeddedSignupEnabled, setEmbeddedSignupEnabled] = useState(false);
   type RegistrationProbe = {
     live: boolean;
     checks: Record<string, boolean | null>;
@@ -202,6 +208,25 @@ export function WhatsAppConfig() {
     loadedAccountIdRef.current = accountId;
     fetchConfig(accountId);
   }, [authLoading, profileLoading, user?.id, accountId, fetchConfig]);
+
+  // One-shot flag check for Embedded Signup availability. Independent
+  // of account switching and of the user session — the operator's env
+  // config is instance-wide, so it runs exactly once on mount.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/whatsapp/embedded-signup/config', { method: 'GET' })
+      .then((res) => (res.ok ? res.json() : { enabled: false }))
+      .then((payload: { enabled?: boolean }) => {
+        if (!cancelled) setEmbeddedSignupEnabled(payload.enabled === true);
+      })
+      .catch(() => {
+        if (!cancelled) setEmbeddedSignupEnabled(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function handleToggleMirrorMedia(next: boolean) {
     if (!config || !accountId || savingMirror) return;
@@ -431,6 +456,110 @@ export function WhatsAppConfig() {
 
   const showResetBanner = resetReason === 'token_corrupted';
 
+  // Manual credential entry. Always rendered as its own top-level card:
+  // next to "Connect with Meta" it's an alternative connection path the
+  // user can choose freely (required for Meta app-review demos), and on
+  // instances without Embedded Signup it's the only option.
+  const apiCredentialsCard = (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-foreground">{t('apiCredentialsTitle')}</CardTitle>
+        <CardDescription className="text-muted-foreground">
+          {t('apiCredentialsDesc')}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label className="text-muted-foreground">{t('phoneNumberId')}</Label>
+          <Input
+            placeholder="e.g. 100234567890123"
+            value={phoneNumberId}
+            onChange={(e) => setPhoneNumberId(e.target.value)}
+            className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-muted-foreground">{t('wabaId')}</Label>
+          <Input
+            placeholder="e.g. 100234567890456"
+            value={wabaId}
+            onChange={(e) => setWabaId(e.target.value)}
+            className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-muted-foreground">{t('accessToken')}</Label>
+          <div className="relative">
+            <Input
+              type={showToken ? 'text' : 'password'}
+              placeholder={t('accessTokenPlaceholder')}
+              value={accessToken}
+              onChange={(e) => {
+                setAccessToken(e.target.value);
+                setTokenEdited(true);
+              }}
+              onFocus={() => {
+                if (accessToken === MASKED_TOKEN) {
+                  setAccessToken('');
+                  setTokenEdited(true);
+                }
+              }}
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowToken(!showToken)}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {showToken ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+            </button>
+          </div>
+          {config && !tokenEdited && (
+            <p className="text-xs text-muted-foreground">
+              {t('tokenHidden')}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-muted-foreground">{t('webhookVerifyToken')}</Label>
+          <Input
+            placeholder={t('webhookVerifyTokenPlaceholder')}
+            value={verifyToken}
+            onChange={(e) => setVerifyToken(e.target.value)}
+            className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
+          />
+          <p className="text-xs text-muted-foreground">
+            {t('webhookVerifyTokenHint')}
+          </p>
+        </div>
+
+        <div className="space-y-2">
+          <Label className="text-muted-foreground">
+            {t('twoStepPin')}
+            <span className="ml-1 text-muted-foreground">{t('optional')}</span>
+          </Label>
+          <Input
+            type="text"
+            inputMode="numeric"
+            maxLength={6}
+            placeholder={t('pinPlaceholder')}
+            value={pin}
+            onChange={(e) =>
+              setPin(e.target.value.replace(/\D/g, '').slice(0, 6))
+            }
+            className="bg-muted border-border text-foreground placeholder:text-muted-foreground tracking-widest"
+          />
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            <span dangerouslySetInnerHTML={{ __html: t('pinHint') }} />
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <section className="animate-in fade-in-50 duration-200">
       <SettingsPanelHead
@@ -494,6 +623,29 @@ export function WhatsAppConfig() {
                 t('notConnectedDesc')}
           </AlertDescription>
         </Alert>
+
+        {/* Connect with Meta — the zero-friction path. Shown only when
+            the instance has Embedded Signup configured AND nothing is
+            connected yet. The manual form below stays equally available
+            so users can pick either path. */}
+        {embeddedSignupEnabled && !config && (
+          <>
+            <EmbeddedSignupCard
+              enabled={embeddedSignupEnabled}
+              canEdit={canEditSettings}
+              onConnected={() => {
+                if (accountId) fetchConfig(accountId);
+              }}
+            />
+            <div className="flex items-center gap-3" role="separator">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs text-muted-foreground">
+                {t('orConnectManually')}
+              </span>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+          </>
+        )}
 
         {/* Registration Status — the "is it actually live?" check.
             Credentials being valid is necessary but not sufficient;
@@ -598,104 +750,9 @@ export function WhatsAppConfig() {
           </Alert>
         )}
 
-        {/* API Credentials */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-foreground">{t('apiCredentialsTitle')}</CardTitle>
-            <CardDescription className="text-muted-foreground">
-              {t('apiCredentialsDesc')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label className="text-muted-foreground">{t('phoneNumberId')}</Label>
-              <Input
-                placeholder="e.g. 100234567890123"
-                value={phoneNumberId}
-                onChange={(e) => setPhoneNumberId(e.target.value)}
-                className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-muted-foreground">{t('wabaId')}</Label>
-              <Input
-                placeholder="e.g. 100234567890456"
-                value={wabaId}
-                onChange={(e) => setWabaId(e.target.value)}
-                className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-muted-foreground">{t('accessToken')}</Label>
-              <div className="relative">
-                <Input
-                  type={showToken ? 'text' : 'password'}
-                  placeholder={t('accessTokenPlaceholder')}
-                  value={accessToken}
-                  onChange={(e) => {
-                    setAccessToken(e.target.value);
-                    setTokenEdited(true);
-                  }}
-                  onFocus={() => {
-                    if (accessToken === MASKED_TOKEN) {
-                      setAccessToken('');
-                      setTokenEdited(true);
-                    }
-                  }}
-                  className="bg-muted border-border text-foreground placeholder:text-muted-foreground pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowToken(!showToken)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {showToken ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-                </button>
-              </div>
-              {config && !tokenEdited && (
-                <p className="text-xs text-muted-foreground">
-                  {t('tokenHidden')}
-                </p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-muted-foreground">{t('webhookVerifyToken')}</Label>
-              <Input
-                placeholder={t('webhookVerifyTokenPlaceholder')}
-                value={verifyToken}
-                onChange={(e) => setVerifyToken(e.target.value)}
-                className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
-              />
-              <p className="text-xs text-muted-foreground">
-                {t('webhookVerifyTokenHint')}
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label className="text-muted-foreground">
-                {t('twoStepPin')}
-                <span className="ml-1 text-muted-foreground">{t('optional')}</span>
-              </Label>
-              <Input
-                type="text"
-                inputMode="numeric"
-                maxLength={6}
-                placeholder={t('pinPlaceholder')}
-                value={pin}
-                onChange={(e) =>
-                  setPin(e.target.value.replace(/\D/g, '').slice(0, 6))
-                }
-                className="bg-muted border-border text-foreground placeholder:text-muted-foreground tracking-widest"
-              />
-              <p className="text-xs text-muted-foreground leading-relaxed">
-                <span dangerouslySetInnerHTML={{ __html: t('pinHint') }} />
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        {/* API Credentials — manual entry, always available as an
+            alternative to "Connect with Meta". */}
+        {apiCredentialsCard}
 
         {/* Webhook URL */}
         <Card>

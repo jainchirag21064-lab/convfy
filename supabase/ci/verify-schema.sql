@@ -242,6 +242,50 @@ BEGIN
     RAISE EXCEPTION 'accounts.flow_import_export_enabled default false is missing — migration 048 did not apply';
   END IF;
 
+  -- 049: WhatsApp catalog sync tables
+  IF to_regclass('public.catalogs') IS NULL THEN
+    RAISE EXCEPTION 'public.catalogs is missing — migrations did not apply';
+  END IF;
+  IF to_regclass('public.catalog_items') IS NULL THEN
+    RAISE EXCEPTION 'public.catalog_items is missing — migrations did not apply';
+  END IF;
+
+  -- 050: Meta Embedded Signup fields on whatsapp_config
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'whatsapp_config'
+      AND column_name = 'business_portfolio_id'
+  ) THEN
+    RAISE EXCEPTION 'whatsapp_config.business_portfolio_id is missing — migration 050 did not apply';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'whatsapp_config'
+      AND column_name = 'token_expires_at'
+  ) THEN
+    RAISE EXCEPTION 'whatsapp_config.token_expires_at is missing — migration 050 did not apply';
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'whatsapp_config'
+      AND column_name = 'onboarded_via'
+      AND is_nullable = 'NO'
+  ) THEN
+    RAISE EXCEPTION 'whatsapp_config.onboarded_via NOT NULL is missing — migration 050 did not apply';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'whatsapp_config'
+      AND column_name = 'onboarded_via'
+      AND column_default IS NULL
+  ) THEN
+    RAISE EXCEPTION 'whatsapp_config.onboarded_via default is missing — migration 050 did not apply';
+  END IF;
+
   RAISE NOTICE 'schema verification passed';
 END
 $$;
