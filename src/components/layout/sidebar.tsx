@@ -29,6 +29,7 @@ import {
   MegaphoneSimpleIcon,
   RobotIcon,
   SquaresFourIcon,
+  StorefrontIcon,
 } from '@/components/ui/brand-icons';
 import type { AccountRole } from '@/lib/auth/roles';
 
@@ -93,6 +94,7 @@ const navItems: NavItem[] = [
   { href: '/pipelines', labelKey: 'pipelines', icon: GitBranchIcon },
   { href: '/broadcasts', labelKey: 'broadcasts', icon: MegaphoneSimpleIcon },
   { href: '/flows', labelKey: 'flows', icon: FlowArrowIcon },
+  { href: '/catalogs', labelKey: 'catalogs', icon: StorefrontIcon },
   { href: '/agents', labelKey: 'aiAgents', icon: RobotIcon },
 ];
 

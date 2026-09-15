@@ -28,6 +28,7 @@
     "broadcasts": "Broadcasts",
     "automations": "Automations",
     "flows": "Flows",
+    "catalogs": "Catalogs",
     "aiAgents": "AI Agents",
     "settings": "Settings",
     "beta": "Beta",
@@ -1348,6 +1349,28 @@
       "tagNone": "{mode} tag (none picked)"
     }
   },
+  "Catalogs": {
+    "page": {
+      "title": "Product Catalog",
+      "subtitle": "Products your customers can order — pulled from your Meta WhatsApp Business catalog.",
+      "lastSynced": "Last synced {time}",
+      "neverSynced": "Never synced — products appear after the first sync.",
+      "sync": "Sync from Meta",
+      "syncing": "Syncing…",
+      "syncAdminOnly": "Only admins can sync the catalog.",
+      "retry": "Retry",
+      "noProducts": "No products yet",
+      "noProductsDesc": "Sync your WhatsApp Business catalog to browse products here.",
+      "productCount": "{count} products",
+      "inStock": "In stock",
+      "outOfStock": "Out of stock",
+      "approved": "Approved",
+      "pending": "Pending",
+      "rejected": "Rejected",
+      "errorLoad": "Failed to load the catalog.",
+      "errorSync": "Failed to sync the catalog."
+    }
+  },
   "Settings": {
     "pageTitle": "Settings",
     "pageDesc": "Everything in one place — your account and your workspace. Pick a section to manage it.",
@@ -1614,6 +1637,7 @@
       "diagnosticLastRun": "Diagnostic — last run: ",
       "live": "live",
       "notLive": "not live",
+      "orConnectManually": "or connect manually",
       "apiCredentialsTitle": "API Credentials",
       "apiCredentialsDesc": "Enter your Meta WhatsApp Business API credentials.",
       "phoneNumberId": "Phone Number ID",
