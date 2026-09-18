@@ -1,0 +1,270 @@
+{
+  "format": "wacrm-flow",
+  "version": 1,
+  "flow": {
+    "name": "CONVfy WhatsApp Concierge",
+    "description": "CONVfy's own WhatsApp assistant: greet, answer product and setup questions, capture pricing enquiries for the team to follow up (no prices quoted), and hand off to a human on request.",
+    "trigger_type": "keyword",
+    "trigger_config": {
+      "keywords": [
+        "hi",
+        "hello",
+        "hey",
+        "help",
+        "convfy",
+        "query",
+        "question",
+        "faq",
+        "info",
+        "pricing",
+        "plan",
+        "plans",
+        "price",
+        "support",
+        "demo",
+        "contact"
+      ],
+      "match_type": "contains",
+      "case_sensitive": false
+    },
+    "entry_node_id": "start",
+    "fallback_policy": {
+      "on_unknown_reply": "reprompt",
+      "max_reprompts": 2,
+      "on_timeout_hours": 24,
+      "on_exhaust": "handoff"
+    }
+  },
+  "nodes": [
+    {
+      "node_key": "start",
+      "node_type": "start",
+      "config": { "next_node_key": "welcome" },
+      "position_x": 0,
+      "position_y": 40
+    },
+    {
+      "node_key": "welcome",
+      "node_type": "send_message",
+      "config": {
+        "text": "👋 Hello! Welcome to CONVfy — the fully managed WhatsApp CRM and automation service.\n\nWe set up, run and support your WhatsApp Business messaging: shared inbox, contact CRM, automated flows, broadcasts and catalog chat ordering.\n\nWhat would you like help with?",
+        "next_node_key": "main_menu"
+      },
+      "position_x": 0,
+      "position_y": 220
+    },
+    {
+      "node_key": "main_menu",
+      "node_type": "send_list",
+      "config": {
+        "text": "Pick an option below and I'll take it from there.",
+        "button_label": "Choose an option",
+        "capture_var_key": "main_intent",
+        "sections": [
+          {
+            "title": "Learn about CONVfy",
+            "rows": [
+              { "reply_id": "what_is_convfy", "title": "What is CONVfy?", "next_node_key": "faq_what_is" },
+              { "reply_id": "how_it_works", "title": "How it works", "next_node_key": "how_it_works" },
+              { "reply_id": "who_sets_up", "title": "Who sets it up?", "next_node_key": "setup_answer" }
+            ]
+          },
+          {
+            "title": "Get in touch",
+            "rows": [
+              { "reply_id": "pricing", "title": "Pricing & plans", "next_node_key": "pricing_ask" },
+              { "reply_id": "human", "title": "Talk to a human", "next_node_key": "human_ask" }
+            ]
+          }
+        ]
+      },
+      "position_x": 0,
+      "position_y": 400
+    },
+    {
+      "node_key": "faq_what_is",
+      "node_type": "send_message",
+      "config": {
+        "text": "CONVfy is a fully managed WhatsApp CRM and automation service. We handle the technical setup and configuration for you, and your monthly plan covers the ongoing operations and support that keep it running.",
+        "next_node_key": "features_menu"
+      },
+      "position_x": 380,
+      "position_y": 60
+    },
+    {
+      "node_key": "features_menu",
+      "node_type": "send_list",
+      "config": {
+        "text": "We cover a lot — which area would you like details on?",
+        "button_label": "See options",
+        "capture_var_key": "feature_intent",
+        "sections": [
+          {
+            "title": "Core features",
+            "rows": [
+              { "reply_id": "shared_inbox", "title": "Shared inbox", "next_node_key": "feature_inbox" },
+              { "reply_id": "automation", "title": "Automated flows", "next_node_key": "feature_flows" },
+              { "reply_id": "broadcasts", "title": "Broadcasts & templates", "next_node_key": "feature_broadcasts" },
+              { "reply_id": "crm", "title": "Contacts & CRM", "next_node_key": "feature_crm" },
+              { "reply_id": "catalogs", "title": "Chat ordering / catalogs", "next_node_key": "feature_catalogs" },
+              { "reply_id": "back_main", "title": "Back to main menu", "next_node_key": "main_menu" }
+            ]
+          }
+        ]
+      },
+      "position_x": 760,
+      "position_y": 60
+    },
+    {
+      "node_key": "feature_inbox",
+      "node_type": "send_message",
+      "config": {
+        "text": "Your whole team works the same WhatsApp number from one shared inbox — customer conversations, replies and history in a single place. No sharing a phone or logging in as one person.",
+        "next_node_key": "anything_else"
+      },
+      "position_x": 1140,
+      "position_y": -80
+    },
+    {
+      "node_key": "feature_flows",
+      "node_type": "send_message",
+      "config": {
+        "text": "Build keyword-triggered conversations: welcome menus, FAQ bots, lead capture and order updates — exactly like the one greeting you now. Every flow can hand over to a human whenever the customer asks.",
+        "next_node_key": "anything_else"
+      },
+      "position_x": 1140,
+      "position_y": 40
+    },
+    {
+      "node_key": "feature_broadcasts",
+      "node_type": "send_message",
+      "config": {
+        "text": "Send approved WhatsApp message templates to your contacts in bulk — campaigns, announcements and order updates — with delivery and status tracking.",
+        "next_node_key": "anything_else"
+      },
+      "position_x": 1140,
+      "position_y": 160
+    },
+    {
+      "node_key": "feature_crm",
+      "node_type": "send_message",
+      "config": {
+        "text": "Every contact gets a profile with their messaging history, tags, pipelines and notes, so your team always has full context before replying.",
+        "next_node_key": "anything_else"
+      },
+      "position_x": 1140,
+      "position_y": 280
+    },
+    {
+      "node_key": "feature_catalogs",
+      "node_type": "send_message",
+      "config": {
+        "text": "Connect your WhatsApp Business catalog and let customers browse and order products directly in chat.",
+        "next_node_key": "anything_else"
+      },
+      "position_x": 1140,
+      "position_y": 400
+    },
+    {
+      "node_key": "how_it_works",
+      "node_type": "send_message",
+      "config": {
+        "text": "We do the technical work. You tell us how your business works and how you want customers handled; we set up your WhatsApp Business connection, CRM configuration and automation flows, test everything with you, and launch. After launch, your monthly plan keeps it running, maintained and supported.",
+        "next_node_key": "anything_else"
+      },
+      "position_x": 380,
+      "position_y": 220
+    },
+    {
+      "node_key": "setup_answer",
+      "node_type": "send_message",
+      "config": {
+        "text": "We do. One-time setup covers the WhatsApp Business connection, your CONVfy configuration, CRM setup and your initial automation flows — including testing and launch assistance. You don't need technical knowledge; you just review the setup before we go live.",
+        "next_node_key": "anything_else"
+      },
+      "position_x": 380,
+      "position_y": 380
+    },
+    {
+      "node_key": "pricing_ask",
+      "node_type": "collect_input",
+      "config": {
+        "prompt_text": "Pricing depends on your business and what you need WhatsApp to handle.\n\nTell us a little: what business are you running, and how would you like customers to reach you — e.g. customer support, order updates, lead capture? Our team will review and get back to you with the right plan.",
+        "var_key": "pricing_requirement",
+        "next_node_key": "pricing_thanks"
+      },
+      "position_x": 380,
+      "position_y": 560
+    },
+    {
+      "node_key": "pricing_thanks",
+      "node_type": "send_message",
+      "config": {
+        "text": "Thank you — we've noted your requirement and a member of our team will reach out shortly with the right plan for you.",
+        "next_node_key": "pricing_handoff"
+      },
+      "position_x": 760,
+      "position_y": 560
+    },
+    {
+      "node_key": "pricing_handoff",
+      "node_type": "handoff",
+      "config": {
+        "note": "Pricing enquiry — requirement: {{vars.pricing_requirement}}. Reach out with the right plan."
+      },
+      "position_x": 1140,
+      "position_y": 560
+    },
+    {
+      "node_key": "human_ask",
+      "node_type": "collect_input",
+      "config": {
+        "prompt_text": "Of course! Tell us briefly what you need and a member of our team will jump in.",
+        "var_key": "human_note",
+        "next_node_key": "human_confirm"
+      },
+      "position_x": 380,
+      "position_y": 740
+    },
+    {
+      "node_key": "human_confirm",
+      "node_type": "send_message",
+      "config": {
+        "text": "Thanks — a team member is on it and will reply shortly.",
+        "next_node_key": "human_handoff"
+      },
+      "position_x": 760,
+      "position_y": 740
+    },
+    {
+      "node_key": "human_handoff",
+      "node_type": "handoff",
+      "config": {
+        "note": "Customer requested a human — note: {{vars.human_note}}."
+      },
+      "position_x": 1140,
+      "position_y": 740
+    },
+    {
+      "node_key": "anything_else",
+      "node_type": "send_buttons",
+      "config": {
+        "text": "Anything else I can help you with?",
+        "footer_text": "Tap a button below.",
+        "buttons": [
+          { "reply_id": "yes_continue", "title": "Yes", "next_node_key": "main_menu" },
+          { "reply_id": "no_done", "title": "No, that's all", "next_node_key": "end" }
+        ]
+      },
+      "position_x": 760,
+      "position_y": 320
+    },
+    {
+      "node_key": "end",
+      "node_type": "end",
+      "config": {},
+      "position_x": 760,
+      "position_y": 480
+    }
+  ]
+}
