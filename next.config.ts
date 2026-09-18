@@ -69,11 +69,6 @@ const SECURITY_HEADERS = [
 ] as const;
 
 const nextConfig: NextConfig = {
-  // Emit a self-contained server bundle (.next/standalone) so the
-  // Docker image can run without node_modules or the Next CLI.
-  // Harmless outside Docker: `next start` keeps working as before.
-  output: "standalone",
-
   /**
    * Cross-origin dev access (Next.js 16).
    *
@@ -167,3 +162,9 @@ const nextConfig: NextConfig = {
 };
 
 export default withNextIntl(nextConfig);
+
+// Cloudflare Workers local dev support: makes `next dev` work with
+// Miniflare bindings (nodejs_compat etc.) so local development runs
+// in the same runtime as the deployed Worker.
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
+initOpenNextCloudflareForDev();

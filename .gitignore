@@ -42,4 +42,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# cloudflare (opennext/wrangler)
+.open-next
+.wrangler
+.dev.vars
+cloudflare-env.d.ts
+.deploy
 .opencode/skills/generate-flows/SKILL.md

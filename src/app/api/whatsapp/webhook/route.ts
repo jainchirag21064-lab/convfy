@@ -201,29 +201,71 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  // Process AFTER the response so we ack Meta within their ~20s timeout
+// Process AFTER the response so we ack Meta within their ~20s timeout
   // (a slow ack triggers Meta retries + duplicate inserts), while still
   // guaranteeing the work runs to completion.
   //
-  // This MUST use `after()` rather than a detached `processWebhook(body)`
-  // promise: on serverless platforms (we run on Vercel) the function can
-  // be frozen or terminated the moment the response is sent, so a floating
-  // promise's DB writes are not guaranteed to finish. That dropped a
-  // non-deterministic *subset* of inbound messages — contacts/conversations
-  // were created but the message insert never landed, leaving conversations
-  // that show in the inbox with an empty thread, and no logs to explain it
-  // (see issue #301). `after()` hands the callback to the runtime, which
-  // keeps the function alive until it resolves (within the route's
-  // maxDuration).
-  after(async () => {
-    try {
-      await processWebhook(body)
-    } catch (error) {
-      console.error('Error processing webhook:', error)
-    }
-  })
+  // This MUST use background work rather than a detached `processWebhook(body)`
+  // promise: on serverless platforms the function can be frozen or terminated
+  // the moment the response is sent, so a floating promise's DB writes are not
+  // guaranteed to finish. That dropped a non-deterministic *subset* of inbound
+  // messages — contacts/conversations were created but the message insert never
+  // landed, leaving conversations that show in the inbox with an empty thread,
+  // and no logs to explain it (see issue #301).
+  //
+  // Two runtimes, two idioms:
+  //   - Node (next dev / Vercel / Docker): Next's `after()` hands the callback
+  //     to the runtime, which keeps the function alive until it resolves
+  //     (within the route's maxDuration).
+  //   - Cloudflare Workers: `after()` does NOT survive the response — the
+  //     worker is frozen right after the 200. We use the OpenNext adapter's
+  //     `getCloudflareContext()` to reach the ExecutionContext and run the
+  //     same work inside `ctx.waitUntil()`, which the runtime guarantees.
+  if (!(await scheduleInBackground(() => processWebhook(body)))) {
+    after(async () => {
+      try {
+        await processWebhook(body)
+      } catch (error) {
+        console.error('Error processing webhook:', error)
+      }
+    })
+  }
 
   return NextResponse.json({ status: 'received' }, { status: 200 })
+}
+
+/**
+ * Run post-response background work on whatever platform is hosting us.
+ *
+ * Returns true if the work was scheduled on Cloudflare Workers (via the
+ * ExecutionContext's `waitUntil`), false on Node.js (where the caller should
+ * fall back to Next's `after()`).
+ *
+ * The module-level cache makes repeated lookups cheap and lets the dynamic
+ * import resolve to `null` when @opennextjs/cloudflare isn't installed (so a
+ * Node-only deployment without that devDependency still boots).
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _cfContextCache: Promise<{ waitUntil(promise: Promise<any>): void } | null> | null =
+  null
+async function scheduleInBackground(fn: () => Promise<void>): Promise<boolean> {
+  if (_cfContextCache === null) {
+    _cfContextCache = (async () => {
+      try {
+        const { getCloudflareContext } = await import('@opennextjs/cloudflare')
+        const { ctx } = await getCloudflareContext({ async: true })
+        if (!ctx || typeof ctx.waitUntil !== 'function') return null
+        return ctx
+      } catch {
+        // Not running on Workers — Node.js path.
+        return null
+      }
+    })()
+  }
+  const ctx = await _cfContextCache
+  if (!ctx) return false
+  ctx.waitUntil(fn())
+  return true
 }
 
 async function processWebhook(body: { entry?: WhatsAppWebhookEntry[] }) {

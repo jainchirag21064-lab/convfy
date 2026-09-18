@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // OpenNext Cloudflare build output (single bundled worker file).
+    ".open-next/**",
     // Vendored minified opus-recorder encoder worker (served statically).
     "public/opus/**",
   ]),
