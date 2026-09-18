@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "convfy",
+  "name": "convfy-app",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-09-15",
   "compatibility_flags": ["nodejs_compat"],
@@ -11,21 +11,22 @@
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "convfy"
+      "service": "convfy-app"
     }
   ],
   "kv_namespaces": [
     {
       "binding": "NEXT_INC_CACHE_KV",
-      "id": "REPLACE_WITH_KV_NAMESPACE_ID"
+      "id": "3786597da48b492eb4e34c214e0008a0"
     }
   ],
   "vars": {
-    "NEXT_PUBLIC_SUPABASE_URL": "",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "",
-    "NEXT_PUBLIC_META_APP_ID": "",
-    "NEXT_PUBLIC_META_CONFIG_ID": "",
-    "NEXT_PUBLIC_SITE_URL": "",
+    "NEXT_PUBLIC_SUPABASE_URL": "https://kvqvyrogtrodndgdzyge.supabase.co",
+    "NEXT_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt2cXZ5cm9ndHJvZG5kZ2R6eWdlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjU4OTk5NTV9.HfH0L1fAVnzvfYFkvbXhWYhK8GXFZmXYH9GZfOKF8-Q",
+    "NEXT_PUBLIC_META_APP_ID": "2554755194964972",
+    "NEXT_PUBLIC_META_CONFIG_ID": "1203830188982532",
+    "META_APP_ID": "2554755194964972",
+    "NEXT_PUBLIC_SITE_URL": "https://convfy-app.jainchirag21064.workers.dev/",
     "NEXT_PUBLIC_APP_LOCALE": "en"
   },
   "observability": {
